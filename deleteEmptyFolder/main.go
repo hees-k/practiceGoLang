@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 func removeEmptyFolder(path string) bool {
@@ -12,11 +13,15 @@ func removeEmptyFolder(path string) bool {
 		panic(err)
 	}
 
-	if len(files) > 1 {
+	length := len(files)
+
+	if length > 1 {
 		return false
-	} else if len(files) == 1 {
-		// mac
-		if !files[0].IsDir() && files[0].Name() != ".DS_Store" {
+	} else if length == 1 {
+
+		if MacOS && !files[0].IsDir() && files[0].Name() == ".DS_Store" {
+			// mac. will delete
+		} else {
 			return false
 		}
 	}
@@ -44,6 +49,9 @@ func travel(root string) ([]string, error) {
 	return files, err
 }
 
+const MacOS = runtime.GOOS == "darwin"
+const WinOS = runtime.GOOS == "windows"
+
 func main() {
 	root := "./test_dir"
 	if len(os.Args) >= 2 {
@@ -66,8 +74,6 @@ func main() {
 		var path = files[i]
 		if removeEmptyFolder(path) {
 			fmt.Println(path, "is removed")
-		} else {
-			fmt.Println(path, "is not empty")
 		}
 	}
 }
